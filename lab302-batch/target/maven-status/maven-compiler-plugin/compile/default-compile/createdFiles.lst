@@ -1,0 +1,5 @@
+egovframework\brte\sample\domain\trade\CustomerCreditIncreaseProcessor.class
+egovframework\brte\sample\web\BatchRunController.class
+egovframework\database\SpringContainerHsqlManager.class
+egovframework\brte\sample\domain\trade\CustomerCredit.class
+egovframework\brte\sample\domain\trade\CustomerCreditRowMapper.class

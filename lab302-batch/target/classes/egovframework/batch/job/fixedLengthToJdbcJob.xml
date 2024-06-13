@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd">
+
+	<import resource="abstract/eGovBase.xml" />
+
+	<!--
+		- TODO [Step 3-2-01] fixedLengthToJdbcJob 에서 사용하게되는 itemReader, itemProcessor, itemWriter들을 찾아서 정의해 준다.
+		- 서버를 구동시켜 fixedLengthToJdbcJob 배치가 정상적으로 작동되는지 확인한다.
+	-->
+
+	<!-- JOB -->
+	<job id="fixedLengthToJdbcJob" parent="eGovBaseJob" xmlns="http://www.springframework.org/schema/batch">
+		<step id="fixedLengthToJdbcStep" parent="eGovBaseStep">
+			<!--
+			<tasklet>
+					<chunk reader=""
+					processor=""
+					writer=""
+					commit-interval="2" />
+			</tasklet>
+			-->
+			<tasklet>
+					<chunk
+						reader="fixedLengthToJdbcJob.fixedLengthToJdbcStep.fixedLengthItemReader"
+						processor="fixedLengthToJdbcJob.fixedLengthToJdbcStep.itemProcessor"
+						writer="fixedLengthToJdbcJob.fixedLengthToJdbcStep.jdbcItemWriter"
+						commit-interval="2"
+					/>
+			</tasklet>
+		</step>
+	</job>
+
+	<!-- READER -->
+	<bean id="fixedLengthToJdbcJob.fixedLengthToJdbcStep.fixedLengthItemReader"
+		class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
+		<property name="resource" value="#{jobParameters[inputFile]}" />
+		<property name="lineMapper">
+			<bean class="org.egovframe.rte.bat.core.item.file.mapping.EgovDefaultLineMapper">
+				<property name="lineTokenizer">
+					<bean class="org.egovframe.rte.bat.core.item.file.transform.EgovFixedLengthTokenizer">
+						<property name="columns" value="1-9,10-11" />
+					</bean>
+				</property>
+				<property name="objectMapper">
+					<bean class="org.egovframe.rte.bat.core.item.file.mapping.EgovObjectMapper">
+						<property name="type" value="egovframework.brte.sample.domain.trade.CustomerCredit" />
+						<property name="names" value="name,credit" />
+					</bean>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- PROCESSOR -->
+	<bean id="fixedLengthToJdbcJob.fixedLengthToJdbcStep.itemProcessor"
+				class="egovframework.brte.sample.domain.trade.CustomerCreditIncreaseProcessor" />
+
+	<!--
+		// TODO [Step 3-2-02]  DB에 입력하고 있는 itemWriter을 수정하여 동일한 내용을 output.txt파일을 생성하도록 한다.
+		 1. DB입력대신 File에 쓰기위하여 bean에 매핑하는 클래스를 EgovJdbcBatchItemWriter 대신  FlatFileItemWriter로 변경한다.
+		 class="org.springframework.batch.item.file.FlatFileItemWriter"
+		 2. FieldExtractor를 통해 VO의 field값에서 값을 꺼내와서 지정한 Format으로 변환하여 한 라인으로 합친 후에 File에 Write를 수행
+		 3. Item의 필드 값들을 1 Line의 String으로 만들 때 필드값의 범위(고정길이) 지정
+		 4. output 파일위치 지정 :
+		    - Windows OS (상대경로)
+		      file:../../workspace.edu/lab302-batch/src/main/resources/egovframework/batch/data/outputs/txtOutput.txt
+		    - Windows OS (절대경로) : X는 버전에 맞게 수정한다.
+		      file:C:/eGovFrame-4.X.0/workspace.edu/lab302-batch/src/main/resources/egovframework/batch/data/outputs/txtOutput.txt
+		    - mac OS (상대경로)
+		      file:../../../workspace.edu/lab302-batch/src/main/resources/egovframework/batch/data/outputs/txtOutput.txt
+		    - mac OS (절대경로) : X는 버전에 맞게 수정한다.
+		      file:/Users/EGOVEDU/eGovFrame-4.X.0/workspace.edu/lab302-batch/src/main/resources/egovframework/batch/data/outputs/txtOutput.txt
+	-->
+	<!-- WRITER -->
+	
+	<!-- File to DB -->
+	<bean id="fixedLengthToJdbcJob.fixedLengthToJdbcStep.jdbcItemWriter"
+		class="org.egovframe.rte.bat.core.item.database.EgovJdbcBatchItemWriter">
+		<property name="assertUpdates" value="true" />
+		<property name="itemPreparedStatementSetter">
+			<bean class="org.egovframe.rte.bat.core.item.database.support.EgovMethodMapItemPreparedStatementSetter" />
+		</property>
+		<property name="sql" value="UPDATE CUSTOMER set credit =? where name =?" />
+		<property name="params" value="credit,name" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- File to File  -->
+<!-- 	<bean id="fixedLengthToJdbcJob.fixedLengthToJdbcStep.jdbcItemWriter"
+		class="org.springframework.batch.item.file.FlatFileItemWriter" scope="step">
+		<property name="resource" value="file:../../workspace.edu/lab302-batch/src/main/resources/egovframework/batch/data/outputs/txtOutput.txt" />
+		<property name="lineAggregator">
+			<bean class="org.egovframe.rte.bat.core.item.file.transform.EgovFixedLengthLineAggregator">
+				<property name="fieldExtractor">
+					<bean class="org.egovframe.rte.bat.core.item.file.transform.EgovFieldExtractor">
+						<property name="names" value="name,credit" />
+					</bean>
+				</property>
+				<property name="fieldRanges" value="9,2" />
+			</bean>
+		</property>
+	</bean> -->
+ 	
+ 	
+</beans>
