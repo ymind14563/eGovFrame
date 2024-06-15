@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form-validation PUBLIC 
+    "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1//EN" 
+    "http://jakarta.apache.org/commons/dtds/validator_1_1.dtd">
+
+<form-validation>
+
+    <formset>
+        <form name="employee">
+        	<field property="employeeid" depends="required,integer">
+        		<arg0 key="employee.employeeid" />
+			</field>
+        	<field property="superdeptid" depends="required">
+        		<arg0 key="employee.superdeptid" />
+			</field>
+        	<field property="departmentid" depends="required">
+        		<arg0 key="employee.departmentid" />
+			</field>
+        	<!-- <field property="name" depends="required,korean"> -->
+        	<field property="name" depends="required">
+        		<arg0 key="employee.name" />
+			</field>
+			<field property="age" depends="integer">
+        		<arg0 key="employee.age" />        		
+			</field>
+			<field property="email" depends="email,htmltag">
+        		<arg0 key="employee.email" />
+			</field>
+        </form>
+    </formset>
+
+</form-validation>

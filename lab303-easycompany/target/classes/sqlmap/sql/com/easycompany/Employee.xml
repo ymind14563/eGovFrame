@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.easycompany.mapper.EmpMapper">
+
+	<select id="authenticate" parameterType="com.easycompany.cmm.vo.Account"
+		resultType="com.easycompany.cmm.vo.Account">
+		<![CDATA[
+			select employeeid,
+			name,
+			departmentid,
+			password
+			from employee
+			where employeeid = #{employeeid}
+			and password = #{password}
+		]]>
+	</select>
+
+	<select id="getEmployeeInfoById" parameterType="string"
+		resultType="com.easycompany.service.Employee">
+		<![CDATA[
+			select employeeid,
+			name,
+			age,
+			departmentid,
+			password,
+			email,
+			superdeptid
+			from employee a,
+			department b
+			where a.departmentid = b.deptid
+			and employeeid = #{value}
+		]]>
+	</select>
+	<select id="getAllEmployees" parameterType="java.util.Map"
+		resultType="com.easycompany.service.Employee">
+		<![CDATA[
+			select employeeid,
+			name,
+			age,
+			departmentid,
+			password,
+			email
+			from employee
+		]]>
+		<where>
+		<if test="searchEid != null and searchEid != ''">
+			 employeeid =#{searchEid}
+		</if>
+		<if test="searchDid != null and searchDid != ''">
+		    and departmentid =#{searchDid}
+		</if>
+		<if test="searchName != null and searchName != ''">
+		    and name like '%${searchName}%'
+		</if>
+		</where>
+		<![CDATA[
+		
+			order by cast(employeeid as integer)
+	        limit #{recordCountPerPage} OFFSET #{firstIndex}
+        ]]>
+	</select>
+	<select id="getEmployeeCount" parameterType="java.util.Map" resultType="int">
+	    <![CDATA[
+			select count(*) empcount
+			from employee
+		]]>
+		<where>
+		<if test="searchDid != null and searchEid != ''">
+			 employeeid =#{searchEid}
+		</if>
+		<if test="searchDid != null and searchDid != ''">
+		    and departmentid =#{searchDid}
+		</if>
+		<if test="searchDid != null and searchName != ''">
+		    and name like '%${searchName}%'
+		</if>
+		</where>
+	</select>
+	
+	<select id="getNameListForSuggest" resultType="string">
+	    <![CDATA[
+			select name
+			from employee
+			where name like '%' || #{value} || '%'
+		]]>
+	</select>
+    
+    <update id="updateEmployee" parameterType="com.easycompany.service.Employee">
+        <![CDATA[
+	    	update employee
+	    	set name = #{name},
+	    		age = #{age},
+	    		departmentid = #{departmentid},
+	    		email = #{email},
+	    		password = #{password}
+	    	where employeeid = #{employeeid}
+    	]]>
+    </update>
+    <delete id="deleteEmployee" parameterType="com.easycompany.service.Employee">
+         <![CDATA[
+    		delete from employee where employeeid = #{employeeid}
+    	]]>
+    </delete>
+    
+	<!-- TODO [Step 4-5-03] Employee.xml 파일에 insertEmployee 에 해당하는 sql문을 만들어준다. 
+	     insertEmployee ID 로 정의된 insert 구문을 만들어준다. -->
+	<!-- SQL statement :: insert into employee ( employeeid, name, age, departmentid, email, password )values ( #employeeid#, #name#, #age#, #departmentid#, #email#, #password# ) -->
+    <insert id="insertEmployee" parameterType="com.easycompany.service.Employee">
+        <![CDATA[
+	        insert into employee ( employeeid, name, age, departmentid, email, password )
+	        values ( #{employeeid}, #{name}, #{age}, #{departmentid}, #{email}, #{password} )
+        ]]>
+    </insert>
+
+</mapper>

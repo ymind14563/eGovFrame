@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+				http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+
+	<context:component-scan base-package="com.easycompany">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+	</context:component-scan>
+	
+	<mvc:annotation-driven/>
+
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/*Employee.do" />
+			<mvc:mapping path="/employeeList.do" />
+			<bean class="com.easycompany.cmm.interceptor.AuthenticInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+	<mvc:view-controller path="/login.do"/>
+	<mvc:view-controller path="/validator.do"/>
+
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="defaultErrorView" value="cmmn/genneralException" />
+		<property name="exceptionMappings">
+			<props>
+				<prop key="org.egovframe.rte.fdl.cmmn.exception.EgovBizException">cmmn/egovBizException</prop>
+				<prop key="org.springframework.dao.DataAccessException">cmmn/egovBizException</prop>
+				<prop key="org.springframework.transaction.TransactionException">cmmn/egovBizException</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- Message Source-->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource" 
+		p:basename="messages" />
+	
+
+	<!-- For Pagination Tag -->	 
+	<bean id="imageRenderer" class="com.easycompany.cmm.tag.ImagePaginationRenderer"/>
+	
+	<bean id="paginationManager" class="org.egovframe.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationManager">
+		<property name="rendererType">
+			<map>
+				<entry key="image" value-ref="imageRenderer"/>
+			</map>
+		</property>
+	</bean>
+	
+	
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="0"/>
+
+	<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver" p:order="1"
+		  p:viewClass="org.springframework.web.servlet.view.JstlView"
+		  p:prefix="/WEB-INF/jsp/" p:suffix=".jsp"/>
+		  
+	<!-- MappingJacksonJsonView 빈 등록 -->
+	<bean id="jsonView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
+		<property name="contentType" value="text/html;charset=UTF-8"/>
+	</bean>
+    	
+</beans>
